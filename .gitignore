@@ -1,0 +1,30 @@
+## .NET
+**/bin/
+**/obj/
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.sln.docstates
+
+## Build
+.image-built
+
+## Data
+*.db
+*.db-shm
+*.db-wal
+
+## Azure Functions
+local.settings.json
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Misc
+*.swp
+*~

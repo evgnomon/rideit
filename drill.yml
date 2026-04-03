@@ -1,0 +1,36 @@
+---
+concurrency: 30
+base: "http://localhost:8080"
+iterations: 600
+rampup: 5
+
+plan:
+  - name: Root
+    request:
+      url: /
+
+  - name: Health check
+    request:
+      url: /health
+
+  - name: Ping
+    request:
+      url: /api/ping
+
+  - name: Get all forecasts
+    request:
+      url: /api/weather
+
+  - name: Get forecast by ID
+    request:
+      url: /api/weather/1
+
+  - name: Search forecasts
+    request:
+      url: /api/weather/search?summary=Warm&minTemp=10
+
+  - name: Header demo
+    request:
+      url: /api/weather/header-demo
+      headers:
+        X-Custom-Header: drill-test

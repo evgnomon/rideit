@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+**/.git
+**/.vs
+**/node_modules
+*.db
+.image-built
