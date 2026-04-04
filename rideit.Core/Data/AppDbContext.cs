@@ -11,10 +11,17 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<WeatherForecast>().HasData(
-            new WeatherForecast { Id = 1, Date = new DateTime(2026, 1, 1), TemperatureC = 22, Summary = "Warm" },
-            new WeatherForecast { Id = 2, Date = new DateTime(2026, 1, 2), TemperatureC = 18, Summary = "Cool" },
-            new WeatherForecast { Id = 3, Date = new DateTime(2026, 1, 3), TemperatureC = 30, Summary = "Hot" }
-        );
+        modelBuilder.Entity<WeatherForecast>(entity =>
+        {
+            entity.ToContainer("WeatherForecasts");
+            entity.HasPartitionKey(e => e.PartitionKey);
+            entity.HasNoDiscriminator();
+
+            entity.HasData(
+                new WeatherForecast { Id = "1", Date = new DateTime(2026, 1, 1), TemperatureC = 22, Summary = "Warm" },
+                new WeatherForecast { Id = "2", Date = new DateTime(2026, 1, 2), TemperatureC = 18, Summary = "Cool" },
+                new WeatherForecast { Id = "3", Date = new DateTime(2026, 1, 3), TemperatureC = 30, Summary = "Hot" }
+            );
+        });
     }
 }

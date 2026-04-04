@@ -10,8 +10,19 @@ var host = new HostBuilder()
     .ConfigureFunctionsWebApplication()
     .ConfigureServices(services =>
     {
-        services.AddDbContext<AppDbContext>(opts =>
-            opts.UseSqlite(Environment.GetEnvironmentVariable("DbConnection") ?? "Data Source=rideit.db"));
+        var cosmosConnection = Environment.GetEnvironmentVariable("ConnectionStrings__Cosmos");
+        if (!string.IsNullOrEmpty(cosmosConnection))
+        {
+            services.AddDbContext<AppDbContext>(opts =>
+                opts.UseCosmos(
+                    cosmosConnection,
+                    Environment.GetEnvironmentVariable("CosmosDatabase") ?? "rideit"));
+        }
+        else
+        {
+            services.AddDbContext<AppDbContext>(opts =>
+                opts.UseInMemoryDatabase("rideit"));
+        }
 
         services.Configure<WeatherOptions>(opts =>
         {
@@ -23,11 +34,16 @@ var host = new HostBuilder()
     })
     .Build();
 
-// Auto-create DB
-using (var scope = host.Services.CreateScope())
+// Auto-create DB (best-effort; logs warning if Cosmos is unreachable)
+try
 {
+    using var scope = host.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    await db.Database.EnsureCreatedAsync();
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"Warning: Database initialization failed: {ex.Message}");
 }
 
-host.Run();
+await host.RunAsync();

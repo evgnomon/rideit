@@ -1,16 +1,41 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using rideit.Core.Data;
 
 namespace rideit.Tests;
 
-public class WeatherControllerTests : IClassFixture<WebApplicationFactory<Program>>
+public class TestWebApplicationFactory : WebApplicationFactory<Program>
+{
+    private readonly string _dbName = $"TestDb-{Guid.NewGuid()}";
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("Testing");
+        builder.ConfigureServices(services =>
+        {
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseInMemoryDatabase(_dbName));
+
+            // Seed the in-memory database
+            var sp = services.BuildServiceProvider();
+            using var scope = sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            db.Database.EnsureCreated();
+        });
+    }
+}
+
+public class WeatherControllerTests : IClassFixture<TestWebApplicationFactory>
 {
     private readonly HttpClient _client;
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    public WeatherControllerTests(WebApplicationFactory<Program> factory)
+    public WeatherControllerTests(TestWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }
@@ -91,7 +116,7 @@ public class WeatherControllerTests : IClassFixture<WebApplicationFactory<Progra
             Summary = "ToDelete"
         });
         var created = await createResponse.Content.ReadFromJsonAsync<JsonElement>();
-        var id = created.GetProperty("id").GetInt32();
+        var id = created.GetProperty("id").GetString();
 
         var response = await _client.DeleteAsync($"/api/weather/{id}");
 

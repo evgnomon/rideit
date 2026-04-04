@@ -25,7 +25,7 @@ public class WeatherService : IWeatherService
         return await _db.WeatherForecasts.ToListAsync();
     }
 
-    public async Task<WeatherForecast?> GetByIdAsync(int id)
+    public async Task<WeatherForecast?> GetByIdAsync(string id)
     {
         return await _db.WeatherForecasts.FindAsync(id);
     }
@@ -44,7 +44,7 @@ public class WeatherService : IWeatherService
         return forecast;
     }
 
-    public async Task<WeatherForecast?> UpdateAsync(int id, UpdateForecastRequest request)
+    public async Task<WeatherForecast?> UpdateAsync(string id, UpdateForecastRequest request)
     {
         var existing = await _db.WeatherForecasts.FindAsync(id);
         if (existing is null) return null;
@@ -58,7 +58,7 @@ public class WeatherService : IWeatherService
         return existing;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(string id)
     {
         var forecast = await _db.WeatherForecasts.FindAsync(id);
         if (forecast is null) return false;

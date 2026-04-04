@@ -1,13 +1,14 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace rideit.Core.Models;
 
 public class WeatherForecast
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+
+    public string PartitionKey { get; set; } = "forecast";
 
     public DateTime Date { get; set; }
     public int TemperatureC { get; set; }
@@ -15,7 +16,7 @@ public class WeatherForecast
     [MaxLength(50)]
     public string Summary { get; set; } = default!;
 
-    [NotMapped]
+    [JsonIgnore]
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
 

@@ -27,8 +27,8 @@ public class WeatherFunction
 
     [Function("GetForecastById")]
     public async Task<HttpResponseData> GetById(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "weather/{id:int}")] HttpRequestData req,
-        int id)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "weather/{id}")] HttpRequestData req,
+        string id)
     {
         var forecast = await _service.GetByIdAsync(id);
         if (forecast is null)
@@ -61,8 +61,8 @@ public class WeatherFunction
 
     [Function("UpdateForecast")]
     public async Task<HttpResponseData> Update(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "weather/{id:int}")] HttpRequestData req,
-        int id)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "weather/{id}")] HttpRequestData req,
+        string id)
     {
         var request = await req.ReadFromJsonAsync<UpdateForecastRequest>();
         if (request is null)
@@ -81,8 +81,8 @@ public class WeatherFunction
 
     [Function("DeleteForecast")]
     public async Task<HttpResponseData> Delete(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "weather/{id:int}")] HttpRequestData req,
-        int id)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "weather/{id}")] HttpRequestData req,
+        string id)
     {
         var deleted = await _service.DeleteAsync(id);
         return req.CreateResponse(deleted ? HttpStatusCode.NoContent : HttpStatusCode.NotFound);

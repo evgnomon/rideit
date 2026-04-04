@@ -5,8 +5,8 @@ namespace rideit.Core.Services;
 public interface IWeatherService
 {
     Task<IEnumerable<WeatherForecast>> GetAllAsync();
-    Task<WeatherForecast?> GetByIdAsync(int id);
+    Task<WeatherForecast?> GetByIdAsync(string id);
     Task<WeatherForecast> CreateAsync(CreateForecastRequest request);
-    Task<WeatherForecast?> UpdateAsync(int id, UpdateForecastRequest request);
-    Task<bool> DeleteAsync(int id);
+    Task<WeatherForecast?> UpdateAsync(string id, UpdateForecastRequest request);
+    Task<bool> DeleteAsync(string id);
 }

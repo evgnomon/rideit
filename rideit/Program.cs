@@ -6,9 +6,34 @@ using rideit.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// EF Core with SQLite
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Default") ?? "Data Source=rideit.db"));
+// EF Core — DbContext registration (skipped in Testing; tests provide their own)
+var cosmosConnectionString = builder.Configuration.GetConnectionString("Cosmos");
+if (builder.Environment.EnvironmentName == "Testing")
+{
+    // Tests register their own InMemory DbContext
+}
+else if (!string.IsNullOrEmpty(cosmosConnectionString))
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseCosmos(
+            cosmosConnectionString,
+            builder.Configuration["CosmosDatabase"] ?? "rideit",
+            cosmosOptions =>
+            {
+                cosmosOptions.HttpClientFactory(() =>
+                {
+                    var handler = new HttpClientHandler();
+                    handler.ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                    return new HttpClient(handler);
+                });
+            }));
+}
+else
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseInMemoryDatabase("rideit"));
+}
 
 // Options pattern
 builder.Services.Configure<WeatherOptions>(
@@ -49,10 +74,11 @@ builder.Services.AddHttpClient("external", client =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (app.Environment.EnvironmentName != "Testing")
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    await db.Database.EnsureCreatedAsync();
 }
 
 app.UseSwagger();
